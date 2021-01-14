@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.trasier.client.spring.noop.TrasierSpringNoopConfiguration

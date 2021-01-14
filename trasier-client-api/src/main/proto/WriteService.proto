@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+
+package com.trasier.api.client.protobuf;
+
+service WriteService {
+    rpc send(stream SpanRequest) returns (stream SpanResponse);
+}
+
+message SpanResponse {
+    int32 count = 1;
+}
+
+message SpanRequest {
+    string accountId = 1;
+    string spaceKey = 2;
+    repeated Span spans = 3;
+}
+
+message Span {
+    string id = 1;
+    string parentId = 2;
+    string traceId = 3;
+    string conversationId = 4;
+    string name = 5;
+    string status = 6;
+
+    int64 startTimestamp = 7;
+    int64 endTimestamp = 8;
+    int64 beginProcessingTimestamp = 9;
+    int64 finishProcessingTimestamp = 10;
+
+    map<string, string> tags = 11;
+    map<string, string> features = 12;
+
+    Endpoint incomingEndpoint = 13;
+    ContentType incomingContentType = 14;
+    map<string, string> incomingHeader = 15;
+    string incomingData = 16;
+
+    Endpoint outgoingEndpoint = 17;
+    ContentType outgoingContentType = 18;
+    map<string, string> outgoingHeader = 19;
+    string outgoingData = 20;
+}
+
+enum ContentType {
+    TEXT = 0;
+    XML = 1;
+    JSON = 2;
+    SQL = 3;
+    BINARY = 4;
+    ENCRYPTED = 5;
+}
+
+message Endpoint {
+    string name = 1;
+    string ipAddress = 2;
+    string port = 3;
+    string hostname = 4;
+}
