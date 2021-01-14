@@ -10,13 +10,13 @@
     <name>trasier-client</name>
 
     <description>Java library to injest traceable data into Trasier systems.</description>
-    <url>https://github.com/trasiercom/trasier-client</url>
+    <url>https://github.com/trasiercom/trasier-client-java</url>
     <inceptionYear>2018</inceptionYear>
 
     <licenses>
         <license>
             <name>Apache License Version 2.0</name>
-            <url>https://github.com/trasiercom/trasier-client/blob/develop/LICENSE</url>
+            <url>https://github.com/trasiercom/trasier-client-java/blob/develop/LICENSE</url>
         </license>
     </licenses>
 
@@ -269,8 +269,8 @@
 
 
     <scm>
-        <connection>scm:git:git@github.com:trasiercom/trasier-client.git</connection>
-        <url>https://github.com/trasiercom/trasier-client.git</url>
+        <connection>scm:git:git@github.com:trasiercom/trasier-client-java.git</connection>
+        <url>https://github.com/trasiercom/trasier-client-java.git</url>
         <tag>HEAD</tag>
     </scm>
 
