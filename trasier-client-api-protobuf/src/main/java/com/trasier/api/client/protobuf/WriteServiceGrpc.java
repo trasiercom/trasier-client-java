@@ -5,11 +5,6 @@ import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
 
-/**
- */
-@javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.24.0)",
-    comments = "Source: WriteService.proto")
 public final class WriteServiceGrpc {
 
   private WriteServiceGrpc() {}

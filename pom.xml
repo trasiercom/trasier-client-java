@@ -65,6 +65,7 @@
         <module>trasier-client-spring-grpc</module>
         <module>trasier-client-spring-grpc-starter</module>
         <module>trasier-client-opentracing</module>
+        <module>trasier-client-opentelemetry</module>
         <module>trasier-client-spring-interceptor</module>
         <module>trasier-client-spring-interceptor-ws</module>
         <module>trasier-client-spring-boot</module>
