@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trasier.client.api.Client;
 import com.trasier.client.api.Span;
-import com.trasier.client.auth.OAuthTokenSafe;
+import com.trasier.client.auth.AuthInterceptor;
 import com.trasier.client.configuration.TrasierClientConfiguration;
 import com.trasier.client.configuration.TrasierEndpointConfiguration;
 import com.trasier.client.interceptor.TrasierSpanInterceptor;
@@ -27,14 +27,14 @@ public class TrasierHttpClient implements Client {
     private final TrasierClientConfiguration clientConfiguration;
     private final ObjectMapper mapper;
     private final AsyncHttpClient client;
-    private final OAuthTokenSafe tokenSafe;
+    private final AuthInterceptor authInterceptor;
     private final List<TrasierSpanInterceptor> spanInterceptors;
     private final String writerEndpointUrl;
     private final TrasierHttpClientHandler handler;
 
-    public TrasierHttpClient(TrasierClientConfiguration clientConfiguration, TrasierEndpointConfiguration endpointConfiguration, OAuthTokenSafe tokenSafe, AsyncHttpClient client) {
+    public TrasierHttpClient(TrasierClientConfiguration clientConfiguration, TrasierEndpointConfiguration endpointConfiguration, AuthInterceptor authInterceptor, AsyncHttpClient client) {
         this.clientConfiguration = clientConfiguration;
-        this.tokenSafe = tokenSafe;
+        this.authInterceptor = authInterceptor;
         this.client = client;
         this.mapper = createObjectMapper();
         this.spanInterceptors = new ArrayList<>();
@@ -71,18 +71,20 @@ public class TrasierHttpClient implements Client {
     }
 
     protected boolean sendSpansInternal(List<Span> spans) throws JsonProcessingException {
-        String token = tokenSafe.getToken();
-        if(token != null && !token.isEmpty()) {
-            BoundRequestBuilder requestBuilder = client
-                    .preparePost(writerEndpointUrl)
-                    .setHeader("Content-Type", "application/json")
-                    .setHeader("Authorization", "Bearer " + token)
-                    .setBody(mapper.writeValueAsBytes(spans));
-            Request request = requestBuilder.build();
-            client.executeRequest(request, handler);
-            return true;
+        BoundRequestBuilder requestBuilder = client.preparePost(writerEndpointUrl);
+        if (clientConfiguration.isUseAuth()) {
+            String token = authInterceptor.getToken();
+            if (token == null || token.isEmpty()) {
+                return false;
+            }
+            requestBuilder.setHeader("Authorization", "Bearer " + token);
         }
-        return false;
+
+        requestBuilder.setHeader("Content-Type", "application/json");
+        requestBuilder.setBody(mapper.writeValueAsBytes(spans));
+        Request request = requestBuilder.build();
+        client.executeRequest(request, handler);
+        return true;
     }
 
     @Override

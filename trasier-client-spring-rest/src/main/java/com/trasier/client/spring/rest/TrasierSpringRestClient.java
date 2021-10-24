@@ -1,6 +1,8 @@
 package com.trasier.client.spring.rest;
 
 import com.trasier.client.api.Span;
+import com.trasier.client.auth.AuthInterceptor;
+import com.trasier.client.auth.NoAuthInterceptor;
 import com.trasier.client.auth.OAuthTokenSafe;
 import com.trasier.client.configuration.TrasierClientConfiguration;
 import com.trasier.client.configuration.TrasierEndpointConfiguration;
@@ -27,7 +29,7 @@ public class TrasierSpringRestClient implements TrasierSpringClient {
     @Autowired
     public TrasierSpringRestClient(TrasierEndpointConfiguration endpointConfiguration, TrasierClientConfiguration clientConfiguration, Optional<TrasierProxyConfiguration> optionalProxyConfiguration, Optional<List<TrasierSpanInterceptor>> optionalSpanInterceptors) {
         AsyncHttpClient client = createHttpClient(clientConfiguration, optionalProxyConfiguration);
-        OAuthTokenSafe tokenSafe = new OAuthTokenSafe(clientConfiguration, endpointConfiguration.getAuthEndpoint(), client);
+        AuthInterceptor tokenSafe = clientConfiguration.isUseAuth() ? new OAuthTokenSafe(clientConfiguration, endpointConfiguration.getAuthEndpoint(), client) : new NoAuthInterceptor();
         TrasierHttpClient trasierHttpClient = new TrasierHttpClient(clientConfiguration, endpointConfiguration, tokenSafe, client);
         this.client = trasierHttpClient;
         if (clientConfiguration.isActivated()) {
