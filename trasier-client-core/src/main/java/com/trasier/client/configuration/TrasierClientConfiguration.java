@@ -7,6 +7,7 @@ public class TrasierClientConfiguration {
     private String clientSecret;
     private String systemName;
 
+    private boolean useAuth = true;
     private boolean activated = true;
     private boolean payloadTracingDisabled = false;
     private boolean compressPayloadDisabled = false;
@@ -121,4 +122,11 @@ public class TrasierClientConfiguration {
         this.ahcRequestTimeout = ahcRequestTimeout;
     }
 
+    public boolean isUseAuth() {
+        return useAuth;
+    }
+
+    public void setUseAuth(boolean useAuth) {
+        this.useAuth = useAuth;
+    }
 }
