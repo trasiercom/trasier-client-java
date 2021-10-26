@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class OAuthTokenSafe {
+public class OAuthTokenSafe implements AuthInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(OAuthTokenSafe.class);
     private static final int EXPIRES_IN_TOLERANCE = 60;
 
@@ -40,6 +40,7 @@ public class OAuthTokenSafe {
         this.asyncHandler = new AsyncTokenHandler();
     }
 
+    @Override
     public String getToken() {
         if (isTokenInvalid()) {
             refreshToken();
@@ -47,6 +48,7 @@ public class OAuthTokenSafe {
         return token != null ? token.getAccessToken() : null;
     }
 
+    @Override
     public void refreshToken() {
         if (isTokenInvalid()) {
             if (!isFeatching.getAndSet(true)) {

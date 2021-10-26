@@ -1,5 +1,7 @@
 package com.trasier.client.spring.grpc;
 
+import com.trasier.client.auth.AuthInterceptor;
+import com.trasier.client.auth.NoAuthInterceptor;
 import com.trasier.client.auth.OAuthTokenSafe;
 import com.trasier.client.configuration.TrasierClientConfiguration;
 import com.trasier.client.configuration.TrasierEndpointConfiguration;
@@ -21,24 +23,24 @@ import javax.annotation.PostConstruct;
 public class TrasierAuthClientInterceptor implements ClientInterceptor {
 
     private final TrasierClientConfiguration clientConfiguration;
-    private final OAuthTokenSafe oAuthTokenSafe;
+    private final AuthInterceptor authInterceptor;
 
     @Autowired
     public TrasierAuthClientInterceptor(TrasierClientConfiguration clientConfiguration, TrasierEndpointConfiguration endpointConfiguration) {
         this.clientConfiguration = clientConfiguration;
         AsyncHttpClient client = AsyncHttpClientFactory.createDefaultClient(clientConfiguration);
-        this.oAuthTokenSafe = new OAuthTokenSafe(clientConfiguration, endpointConfiguration.getAuthEndpoint(), client);
+        this.authInterceptor = clientConfiguration.isUseAuth() ? new OAuthTokenSafe(clientConfiguration, endpointConfiguration.getAuthEndpoint(), client) : new NoAuthInterceptor();
     }
 
-    public TrasierAuthClientInterceptor(TrasierClientConfiguration clientConfiguration, OAuthTokenSafe tokenSafe) {
+    public TrasierAuthClientInterceptor(TrasierClientConfiguration clientConfiguration, AuthInterceptor tokenSafe) {
         this.clientConfiguration = clientConfiguration;
-        this.oAuthTokenSafe = tokenSafe;
+        this.authInterceptor = tokenSafe;
     }
 
     @PostConstruct
     public void init() {
         if (clientConfiguration.isActivated()) {
-            oAuthTokenSafe.refreshToken();
+            authInterceptor.refreshToken();
         }
     }
 
@@ -47,9 +49,15 @@ public class TrasierAuthClientInterceptor implements ClientInterceptor {
         return new ClientInterceptors.CheckedForwardingClientCall(channel.newCall(methodDescriptor, callOptions)) {
             @Override
             protected void checkedStart(Listener listener, Metadata metadata) {
-                String token = oAuthTokenSafe.getToken();
-                if(token != null && !token.isEmpty()) {
-                    metadata.put(Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER), token);
+                if (clientConfiguration.isUseAuth()) {
+                    String token = authInterceptor.getToken();
+                    if (token != null && !token.isEmpty()) {
+                        metadata.put(Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER), token);
+                        metadata.put(Metadata.Key.of("accountId", Metadata.ASCII_STRING_MARSHALLER), clientConfiguration.getAccountId());
+                        metadata.put(Metadata.Key.of("spaceKey", Metadata.ASCII_STRING_MARSHALLER), clientConfiguration.getSpaceKey());
+                        delegate().start(listener, metadata);
+                    }
+                } else {
                     metadata.put(Metadata.Key.of("accountId", Metadata.ASCII_STRING_MARSHALLER), clientConfiguration.getAccountId());
                     metadata.put(Metadata.Key.of("spaceKey", Metadata.ASCII_STRING_MARSHALLER), clientConfiguration.getSpaceKey());
                     delegate().start(listener, metadata);
