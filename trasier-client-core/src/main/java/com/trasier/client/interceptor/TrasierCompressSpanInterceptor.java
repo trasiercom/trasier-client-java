@@ -41,22 +41,22 @@ public class TrasierCompressSpanInterceptor {
                 if (totalBytes > this.payloadLimitBytes) {
                     if (incomingDataBytes.length > this.payloadLimitBytes || (isServer(span) && outgoingDataBytes.length < this.payloadLimitBytes)) {
                         incomingDataBytes = Snappy.compress(truncateMessage ? truncate(incomingData.getBytes()) : PAYLOAD_TOO_BIG);
+                        span.getTags().put(INCOMING_DATA_COMPRESSION, SNAPPY);
                     }
                 }
                 String compressedData = Base64.getEncoder().encodeToString(incomingDataBytes);
                 span.setIncomingData(compressedData);
-                span.getTags().put(INCOMING_DATA_COMPRESSION, SNAPPY);
             }
 
             if (outgoingDataBytes.length > 0) {
                 if (totalBytes > this.payloadLimitBytes) {
                     if (outgoingDataBytes.length > this.payloadLimitBytes || (!isServer(span) && incomingDataBytes.length < this.payloadLimitBytes)) {
                         outgoingDataBytes = Snappy.compress(truncateMessage ? truncate(outgoingData.getBytes()) : PAYLOAD_TOO_BIG);
+                        span.getTags().put(OUTGOING_DATA_COMPRESSION, SNAPPY);
                     }
                 }
                 String compressedData = Base64.getEncoder().encodeToString(outgoingDataBytes);
                 span.setOutgoingData(compressedData);
-                span.getTags().put(OUTGOING_DATA_COMPRESSION, SNAPPY);
             }
         }
     }
